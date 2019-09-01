@@ -9,6 +9,7 @@ const viewsPath = path.join(__dirname, '../templates/views');
 const partialsPath = path.join(__dirname, '../templates/partials');
 
 const app = express();
+const port = process.env.PORT || 3000;
 
 app.set('view engine', 'hbs');
 app.set('views', viewsPath);
@@ -42,21 +43,24 @@ app.get('/weather', (req, res) => {
       error: 'Must providean address'
     });
   }
-  geocode(req.query.address, (error, { latitude, longitude, location }={}) => {
-    if (error) {
-      return res.send({error});
-    }
-    forecast(latitude, longitude, (error, forecastData) => {
+  geocode(
+    req.query.address,
+    (error, { latitude, longitude, location } = {}) => {
       if (error) {
-        return res.send({error});
+        return res.send({ error });
       }
-      res.send({
-        forecast: forecastData,
-        location,
-        address: req.query.address
+      forecast(latitude, longitude, (error, forecastData) => {
+        if (error) {
+          return res.send({ error });
+        }
+        res.send({
+          forecast: forecastData,
+          location,
+          address: req.query.address
+        });
       });
-    });
-  });
+    }
+  );
 });
 
 app.get('*', (req, res) => {
@@ -67,6 +71,6 @@ app.get('*', (req, res) => {
   });
 });
 
-app.listen(3000, () => {
-  console.log('server at 3000');
+app.listen(port, () => {
+  console.log('server at' + port);
 });
